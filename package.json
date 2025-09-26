@@ -1,0 +1,28 @@
+{
+  "name": "exercicio-m24",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha ./test/**/*.test.js",
+    "test:gql": "mocha ./test/graphql/**/*.test.js",
+    "test:rest": "mocha ./test/api/**/*.test.js --timeout 15000",
+    "test:rest:report": "mocha ./test/api/**/*.test.js --timeout 15000 --reporter mochawesome --reporter-option reportDir=reports/rest --reporter-option reportFilename=index --reporter-option overwrite=true --reporter-option quiet=true --reporter-option html=true --reporter-option json=false --reporter-option inlineAssets=true",
+    "test:contractProvider": "mocha ./test/contract/loginProvider.test.js",
+    "test:contractConsumer": "mocha ./test/contract/loginConsumer.test.js",
+    "test:contract:category": "mocha ./test/contract/categoryContract.test.js",
+    "test:contract:product": "mocha ./test/contract/productContract.test.js"
+  },
+  "keywords": [],
+  "author": "renan yassumoto",
+  "license": "ISC",
+  "description": "Exercicio M24",
+  "dependencies": {
+    "mocha": "^11.7.2",
+    "pactum": "^3.8.0",
+    "pactum-flow-plugin": "^0.1.4",
+    "pactum-matchers": "^1.1.7"
+  },
+  "devDependencies": {
+    "mochawesome": "^7.1.4"
+  }
+}
