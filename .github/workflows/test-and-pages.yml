@@ -55,6 +55,7 @@ jobs:
 
       - name: Run tests and generate report (Mochawesome)
         env:
+          ENABLE_FLOW: "true"
           FLOW_VERSION: ${{ github.run_id }}
           FLOW_URL: http://127.0.0.1:${{ env.FLOW_PORT }}
           FLOW_PROJECT: nodejs-m24
