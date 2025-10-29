@@ -1,6 +1,9 @@
 // test/setupFlow.js
+const isCI = !!process.env.CI;
+const flowEnabled = process.env.ENABLE_FLOW === 'true';
 
-if (process.env.CI && process.env.ENABLE_FLOW !== 'true') {
+if (isCI && !flowEnabled) {
+  console.log('Flow desativado no CI (modo seguro)');
   module.exports = {};
 } else {
   const flow = require('pactum-flow-plugin');
