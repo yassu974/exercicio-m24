@@ -1,0 +1,66 @@
+name: Run Mocha Tests and Publish Report
+
+on:
+  push:
+    branches: [ "main", "chore/gha-mochawesome-pages" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci || npm i
+
+      - name: Run tests and generate report
+        run: npm run test:report
+
+      - name: Prepare report for GitHub Pages
+        run: |
+          mkdir -p public
+          cp -r reports/mochawesome/* public/
+          if [ ! -f public/index.html ]; then
+            if [ -f public/merged.html ]; then
+              cp public/merged.html public/index.html
+            else
+              echo "<h1>No Mochawesome report found</h1>" > public/index.html
+            fi
+          fi
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: public
+
+  deploy:
+    if: github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
