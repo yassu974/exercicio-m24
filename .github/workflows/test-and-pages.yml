@@ -20,7 +20,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      FLOW_PORT: "8080" # ajuste se seu compose expõe outra porta
+      # Porta externa exposta pelo seu docker-compose para o Flow (ajuste se necessário)
+      FLOW_PORT: "8080"
 
     steps:
       - name: Checkout repo
@@ -30,8 +31,9 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "20"
-          cache: "npm"
+          cache: "npm" # requer package-lock.json versionado
 
+      # Sobe serviços do docker-compose e espera o Flow ficar de pé
       - name: Start services (docker compose)
         run: |
           set -e
@@ -55,7 +57,9 @@ jobs:
 
       - name: Run tests and generate report (Mochawesome)
         env:
-          ENABLE_FLOW: "true"
+          # 🔒 Desliga publicação do Pactum Flow no CI (o setupFlow faz no-op quando ENABLE_FLOW != 'true')
+          ENABLE_FLOW: "false"
+          # Mantemos estas variáveis para quando você quiser habilitar o Flow no CI
           FLOW_VERSION: ${{ github.run_id }}
           FLOW_URL: http://127.0.0.1:${{ env.FLOW_PORT }}
           FLOW_PROJECT: nodejs-m24
@@ -89,6 +93,7 @@ jobs:
         run: docker compose down -v
 
   deploy:
+    # Publica na GitHub Pages somente em push na main
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     needs: build
     runs-on: ubuntu-latest
