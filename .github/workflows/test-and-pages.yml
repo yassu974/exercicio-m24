@@ -30,21 +30,36 @@ jobs:
           node-version: "20"
           cache: "npm"
 
+      - name: Start services (docker compose)
+        run: |
+          docker compose version || docker --version
+          docker compose up -d
+          # aguarda a porta 8080 responder (ajuste se usar outra porta)
+          for i in {1..60}; do
+            if nc -z 127.0.0.1 8080; then
+              echo "Flow server UP on 8080"
+              break
+            fi
+            echo "Waiting flow server on 8080... ($i/60)"; sleep 2
+          done
+
       - name: Install dependencies
         run: npm ci || npm i
 
-      - name: Run tests and generate report
+      - name: Run tests and generate report (Mochawesome)
         run: npm run test:report
 
       - name: Prepare report for GitHub Pages
         run: |
           mkdir -p public
-          cp -r reports/mochawesome/* public/
+          if [ -d "reports/mochawesome" ]; then
+            cp -r reports/mochawesome/* public/ || true
+          fi
           if [ ! -f public/index.html ]; then
             if [ -f public/merged.html ]; then
               cp public/merged.html public/index.html
             else
-              echo "<h1>No Mochawesome report found</h1>" > public/index.html
+              echo "<h1>Mochawesome Report</h1><p>Relatório ainda não gerado.</p>" > public/index.html
             fi
           fi
 
@@ -53,8 +68,12 @@ jobs:
         with:
           path: public
 
+      - name: Stop services
+        if: always()
+        run: docker compose down -v
+
   deploy:
-    if: github.ref == 'refs/heads/main'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     needs: build
     runs-on: ubuntu-latest
     environment:
