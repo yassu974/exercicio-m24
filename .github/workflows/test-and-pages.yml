@@ -40,7 +40,7 @@ jobs:
           up=0
           for i in {1..60}; do
             if nc -z 127.0.0.1 ${FLOW_PORT}; then
-              echo "Flow UP na porta ${FLOW_PORT}"
+              echo "✅ Flow UP na porta ${FLOW_PORT}"
               up=1
               break
             fi
@@ -55,7 +55,7 @@ jobs:
 
       - name: Run tests and generate report (Mochawesome)
         env:
-          ENABLE_FLOW: "false"
+          ENABLE_FLOW: "false"   # desativa publish do Flow no CI
           FLOW_VERSION: ${{ github.run_id }}
           FLOW_URL: http://127.0.0.1:${{ env.FLOW_PORT }}
           FLOW_PROJECT: nodejs-m24
@@ -89,7 +89,7 @@ jobs:
         run: docker compose down -v
 
   deploy:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    # 🔔 Sem condição: vai publicar em qualquer push das branches declaradas acima
     needs: build
     runs-on: ubuntu-latest
     environment:
@@ -99,3 +99,8 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+      - name: Show published URL
+        run: |
+          echo "Relatório publicado em: ${{ steps.deployment.outputs.page_url }}"
+          echo "Relatório publicado em: ${{ steps.deployment.outputs.page_url }}" >> $GITHUB_STEP_SUMMARY
