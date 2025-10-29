@@ -11,7 +11,7 @@
     "test:contractConsumer": "mocha ./test/contract/loginConsumer.test.js",
     "test:contract:category": "mocha ./test/contract/categoryContract.test.js",
     "test:contract:product": "mocha ./test/contract/productContract.test.js",
-    "test": "mocha ./test/**/*.test.js --timeout 15000 --reporter mochawesome --reporter-option reportDir=reports/mochawesome,reportFilename=results,quiet=true,html=false,json=true",
+    "test": "mocha --require ./test/setupFlow.js ./test/**/*.test.js --timeout 15000 --reporter mochawesome --reporter-option reportDir=reports/mochawesome,reportFilename=results,quiet=true,html=false,json=true",
     "report:merge": "mochawesome-merge reports/mochawesome/*.json > reports/mochawesome/merged.json",
     "report:html": "marge reports/mochawesome/merged.json --reportDir reports/mochawesome --inline true --charts true",
     "test:report": "npm run test && npm run report:merge && npm run report:html"

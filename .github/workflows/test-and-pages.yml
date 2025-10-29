@@ -19,6 +19,9 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    # 🔧 Ajuste aqui a porta externa que o flow server expõe via docker-compose
+    env:
+      FLOW_PORT: "8080" # mude se seu compose expõe outra porta (ex.: "3000")
 
     steps:
       - name: Checkout repo
@@ -28,25 +31,32 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "20"
-          cache: "npm"
+          cache: "npm" # requer package-lock.json versionado
 
+      # Sobe serviços do docker-compose e espera o Flow ficar de pé
       - name: Start services (docker compose)
         run: |
           docker compose version || docker --version
           docker compose up -d
-          # aguarda a porta 8080 responder (ajuste se usar outra porta)
+          echo "⏳ Aguardando Flow subir em http://127.0.0.1:${FLOW_PORT} ..."
           for i in {1..60}; do
-            if nc -z 127.0.0.1 8080; then
-              echo "Flow server UP on 8080"
+            if nc -z 127.0.0.1 ${FLOW_PORT}; then
+              echo "✅ Flow server UP na porta ${FLOW_PORT}"
               break
             fi
-            echo "Waiting flow server on 8080... ($i/60)"; sleep 2
+            sleep 2
           done
 
       - name: Install dependencies
         run: npm ci || npm i
 
       - name: Run tests and generate report (Mochawesome)
+        env:
+          # versão única por execução para evitar 'Analysis already exists'
+          FLOW_VERSION: ${{ github.run_id }}
+          # se seu setupFlow.js lê FLOW_URL/FLOW_PROJECT, eles estarão disponíveis
+          FLOW_URL: http://127.0.0.1:${{ env.FLOW_PORT }}
+          FLOW_PROJECT: nodejs-m24
         run: npm run test:report
 
       - name: Prepare report for GitHub Pages
@@ -68,11 +78,17 @@ jobs:
         with:
           path: public
 
+      # Em caso de erro, mostra os logs dos containers para depurar
+      - name: Docker logs on failure
+        if: failure()
+        run: docker compose logs --no-color --timestamps || true
+
       - name: Stop services
         if: always()
         run: docker compose down -v
 
   deploy:
+    # Só publica quando o push é na main
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     needs: build
     runs-on: ubuntu-latest
