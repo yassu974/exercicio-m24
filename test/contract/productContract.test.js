@@ -15,14 +15,14 @@ async function getToken(maxRetries = 3) {
         .returns('data.token');
     } catch (e) {
       lastErr = e;
-      await new Promise(r => setTimeout(r, 400 * i));
+      await new Promise((r) => setTimeout(r, 400 * i));
     }
   }
   throw lastErr;
 }
 
 async function createCategory(token) {
-  const name  = `CAT-PROD-CONTRACT-${Date.now()}`;
+  const name = `CAT-PROD-CONTRACT-${Date.now()}`;
   const photo = `https://picsum.photos/200?${Date.now()}`;
 
   const data = await spec()
