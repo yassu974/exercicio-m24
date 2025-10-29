@@ -15,7 +15,7 @@ if (isCI && !flowEnabled) {
 
   if (flow?.events?.on) {
     flow.events.on('publish.failed', (err) => {
-      console.error('❌ Flow publish failed:', err?.message || err);
+      console.error('Flow publish failed:', err?.message || err);
     });
   }
 

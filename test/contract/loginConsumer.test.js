@@ -1,5 +1,4 @@
 const { reporter, flow, handler, mock } = require('pactum');
-// ⚠️ Não importe pactum-flow-plugin aqui. O setupFlow.js controla tudo.
 
 before(async () => {
   await mock.start(4000);

@@ -36,18 +36,18 @@ jobs:
         run: |
           set -e
           docker compose up -d
-          echo "⏳ Aguardando Flow em http://127.0.0.1:${FLOW_PORT} ..."
+          echo "Aguardando Flow em http://127.0.0.1:${FLOW_PORT} ..."
           up=0
           for i in {1..60}; do
             if nc -z 127.0.0.1 ${FLOW_PORT}; then
-              echo "✅ Flow UP na porta ${FLOW_PORT}"
+              echo "Flow UP na porta ${FLOW_PORT}"
               up=1
               break
             fi
             sleep 2
           done
           if [ "$up" -ne 1 ]; then
-            echo "❌ Flow não subiu na porta ${FLOW_PORT} em 120s"; docker compose ps; exit 1
+            echo "Flow não subiu na porta ${FLOW_PORT} em 120s"; docker compose ps; exit 1
           fi
 
       - name: Install dependencies
@@ -55,7 +55,7 @@ jobs:
 
       - name: Run tests and generate report (Mochawesome)
         env:
-          ENABLE_FLOW: "false"   # desativa publish do Flow no CI
+          ENABLE_FLOW: "false"
           FLOW_VERSION: ${{ github.run_id }}
           FLOW_URL: http://127.0.0.1:${{ env.FLOW_PORT }}
           FLOW_PROJECT: nodejs-m24
@@ -89,7 +89,6 @@ jobs:
         run: docker compose down -v
 
   deploy:
-    # 🔔 Sem condição: vai publicar em qualquer push das branches declaradas acima
     needs: build
     runs-on: ubuntu-latest
     environment:

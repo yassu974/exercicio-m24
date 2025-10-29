@@ -1,8 +1,7 @@
 const { reporter, flow } = require('pactum');
-// ⚠️ Não importe pactum-flow-plugin aqui. O setupFlow.js controla tudo.
 
 before(async () => {
-  // nada a fazer
+
 });
 
 after(async () => {
